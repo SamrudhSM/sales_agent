@@ -72,5 +72,41 @@ def logout():
     session.clear()
     return redirect(url_for("index"))
 
+@app.route("/product/<int:product_id>")
+def product_page(product_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    # Fetch product info from DB (assuming you have a products table)
+    cursor.execute("SELECT product_id, name, description, price FROM products WHERE product_id = ?", (product_id,))
+    product = cursor.fetchone()
+    conn.close()
+
+    if product:
+        product_data = {
+            "id": product[0],
+            "name": product[1],
+            "description": product[2],
+            "price": product[3]
+        }
+    else:
+        product_data = None  # If product not found
+    
+    return render_template("product.html", product=product_data)
+
+
+def get_products():
+    conn = sqlite3.connect("data.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM products")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+@app.route("/getproducts")
+def getproducts():
+    return jsonify(get_products())
+
 if __name__ == "__main__":
     app.run(debug=True)

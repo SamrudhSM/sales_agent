@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product.name if product else "Product Not Found" }}</title>
+</head>
+<body>
+    {% if product %}
+        <h1>{{ product.name }}</h1>
+        <p>{{ product.description }}</p>
+        <p><strong>Price:</strong> ${{ product.price }}</p>
+    {% else %}
+        <h2>Product not found</h2>
+    {% endif %}
+    <a href="/">Back to Home</a>
+</body>
+</html>

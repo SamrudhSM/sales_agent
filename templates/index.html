@@ -89,41 +89,17 @@
     </main>
 
     <script>
-        const productsFromDB = [
-            {"id":1, "name":"Apple iPad Air", "category":"Electronics", "description":"Tablet for work and study", "price":49717},
-            {"id":2, "name":"Puma Hoodie", "category":"Fashion", "description":"Casual cotton hoodie", "price":6267},
-            {"id":3, "name":"Adidas Sports T-Shirt", "category":"Fashion", "description":"Breathable workout t-shirt", "price":3319},
-            {"id":4, "name":"Nike Sports Shorts", "category":"Fashion", "description":"Comfortable gym shorts", "price":3735},
-            {"id":5, "name":"Zara Leather Jacket", "category":"Fashion", "description":"Stylish leather jacket", "price":10707},
-            {"id":6, "name":"H&M Summer Dress", "category":"Fashion", "description":"Floral summer dress", "price":4939},
-            {"id":7, "name":"Fila Disruptor", "category":"Shoes", "description":"Chunky sneakers trend", "price":7055},
-            {"id":8, "name":"Reebok Classic Leather", "category":"Shoes", "description":"Casual everyday sneakers", "price":7470},
-            {"id":9, "name":"Sony Alpha 7C", "category":"Electronics", "description":"Full-frame mirrorless camera", "price":149399},
-            {"id":10, "name":"Nikon Z30", "category":"Electronics", "description":"Compact mirrorless camera", "price":58926},
-            {"id":11, "name":"Canon EOS R10", "category":"Electronics", "description":"Mirrorless camera for beginners", "price":81257},
-            {"id":12, "name":"Fitbit Charge 6", "category":"Electronics", "description":"Fitness tracking smartwatch", "price":13276},
-            {"id":13, "name":"Apple Watch Series 9", "category":"Electronics", "description":"Smartwatch for fitness and notifications", "price":33117},
-            {"id":14, "name":"Uniqlo T-Shirt", "category":"Fashion", "description":"Basic crew neck t-shirt", "price":1652},
-            {"id":15, "name":"H&M Hoodie", "category":"Fashion", "description":"Comfortable cotton hoodie", "price":4149},
-            {"id":16, "name":"Levi's 501 Jeans", "category":"Fashion", "description":"Classic straight-fit jeans", "price":8134},
-            {"id":17, "name":"Zara Denim Jeans", "category":"Fashion", "description":"Slim-fit denim jeans", "price":5802},
-            {"id":18, "name":"Zara Summer Shirt", "category":"Fashion", "description":"Light cotton shirt for summer", "price":4142},
-            {"id":19, "name":"Puma RS-X", "category":"Shoes", "description":"Trendy sneakers for casual wear", "price":9130},
-            {"id":20, "name":"Nike Revolution 6", "category":"Shoes", "description":"Everyday comfortable running shoes", "price":5395},
-            {"id":21, "name":"Adidas Ultraboost", "category":"Shoes", "description":"High-performance running shoes", "price":14940},
-            {"id":22, "name":"Bose QuietComfort 45", "category":"Electronics", "description":"Premium noise-cancelling headphones", "price":27307},
-            {"id":23, "name":"Sony WH-1000XM5", "category":"Electronics", "description":"Noise-cancelling headphones", "price":33199},
-            {"id":24, "name":"HP Spectre x360", "category":"Electronics", "description":"Convertible laptop for designers", "price":103749},
-            {"id":25, "name":"Dell XPS 13", "category":"Electronics", "description":"Compact laptop for work and study", "price":82999},
-            {"id":26, "name":"Samsung Galaxy S23", "category":"Electronics", "description":"Latest Samsung smartphone", "price":66399},
-            {"id":27, "name":"Zara Floral Maxi", "category":"Fashion", "description":"Floral black maxi dress", "price":7462},
-            {"id":28, "name":"Zara Black Dress", "category":"Fashion", "description":"Elegant black dress for evening parties", "price":6632},
-            {"id":29, "name":"Apple iPhone 15", "category":"Electronics", "description":"Latest iPhone with A17 chip", "price":66317},
-            {"id":30, "name":"MacBook Air M2", "category":"Electronics", "description":"Laptop for designers and students", "price":99517},
-            {"id":31, "name":"Puma Velocity", "category":"Shoes", "description":"High-performance sneakers", "price":10790},
-            {"id":32, "name":"Adidas RunFalcon", "category":"Shoes", "description":"Comfortable daily running shoes", "price":4980},
-            {"id":33, "name":"Nike Air Zoom", "category":"Shoes", "description":"Lightweight running shoes", "price":9960}
-        ];
+let productsFromDB = [];
+
+async function loadProducts() {
+    const res = await fetch("/getproducts");
+    productsFromDB = await res.json();
+    populateCategories();
+    applyFiltersAndSearch();
+    console.log(productsFromDB);
+}
+
+window.onload = loadProducts;
 
         const productGrid = document.getElementById('product-grid');
         const searchInput = document.getElementById('searchInput');
@@ -144,33 +120,41 @@
         }
 
         // --- DISPLAY PRODUCTS ---
-        function displayProducts(products) {
-            productGrid.innerHTML = '';
-            
-            const hasProducts = products.length > 0;
-            noResults.classList.toggle('hidden', hasProducts);
-            productGrid.classList.toggle('hidden', !hasProducts);
+function displayProducts(products) {
+    productGrid.innerHTML = '';
 
-            products.forEach(product => {
-                const bgColor = stringToColor(product.name);
-                const textColor = 'FFFFFF';
-                const placeholderText = product.name.split(' ').map(w => w[0]).join('');
+    const hasProducts = products.length > 0;
+    noResults.classList.toggle('hidden', hasProducts);
+    productGrid.classList.toggle('hidden', !hasProducts);
 
-                const productCard = `
-                    <div class="bg-white rounded-lg shadow-sm overflow-hidden product-card">
-                        <div class="relative">
-                            <img src="https://placehold.co/300x300/${bgColor}/${textColor}?text=${placeholderText}&font=inter" alt="${product.name}" class="w-full h-40 object-cover">
-                        </div>
-                        <div class="p-4">
-                            <p class="text-xs text-gray-500">${product.category}</p>
-                            <h3 class="text-sm font-medium text-gray-800 truncate" title="${product.name}">${product.name}</h3>
-                            <p class="text-lg font-bold text-gray-900 mt-1">${inrFormatter.format(product.price)}</p>
-                        </div>
-                    </div>
-                `;
-                productGrid.innerHTML += productCard;
-            });
-        }
+    products.forEach(product => {
+        const bgColor = stringToColor(product.name);
+        const textColor = 'FFFFFF';
+        const placeholderText = product.name.split(' ').map(w => w[0]).join('');
+
+        // Create link wrapper
+        const link = document.createElement("a");
+        link.href = `/product/${product.product_id}`;
+        link.className = "block";
+
+        // Card div
+        link.innerHTML = `
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden product-card">
+                <div class="relative">
+                    <img src="https://placehold.co/300x300/${bgColor}/${textColor}?text=${placeholderText}&font=inter" 
+                         alt="${product.name}" class="w-full h-40 object-cover">
+                </div>
+                <div class="p-4">
+                    <p class="text-xs text-gray-500">${product.category}</p>
+                    <h3 class="text-sm font-medium text-gray-800 truncate" title="${product.name}">${product.name}</h3>
+                    <p class="text-lg font-bold text-gray-900 mt-1">${inrFormatter.format(product.price)}</p>
+                </div>
+            </div>
+        `;
+
+        productGrid.appendChild(link);
+    });
+}
 
         // --- APPLY FILTERS AND SEARCH ---
         function applyFiltersAndSearch() {
