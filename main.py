@@ -176,6 +176,31 @@ def get_products():
 def getproducts():
     return jsonify(get_products())
 
+@app.route("/history")
+def history():
+    if "customer_id" not in session:
+        return redirect(url_for("login"))
+
+    customer_id = session["customer_id"]
+
+    conn = get_db_connection()
+    purchases = conn.execute("""
+        SELECT p.purchase_id, p.product_id, p.quantity, p.purchase_date,
+               pr.name, pr.price, pr.category
+        FROM purchases p
+        JOIN products pr ON p.product_id = pr.product_id
+        WHERE p.customer_id = ?
+        ORDER BY p.purchase_date DESC
+    """, (customer_id,)).fetchall()
+    conn.close()
+
+    return render_template(
+        "history.html",
+        name=session.get("customer_name"),
+        purchases=purchases
+    )
+
+
 
 @app.route("/checkout", methods=["POST"])
 def checkout():
