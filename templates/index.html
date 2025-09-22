@@ -17,7 +17,6 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        /* Custom focus styles for better accessibility */
         .custom-focus:focus {
             outline: 2px solid transparent;
             outline-offset: 2px;
@@ -26,11 +25,20 @@
             box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
             --tw-ring-color: rgb(59 130 246 / 0.5);
         }
+        #ai-chat-window { scroll-behavior: smooth; }
+        .user-message { background-color: #e0f2fe; align-self: flex-end; }
+        .ai-message { background-color: #f3f4f6; align-self: flex-start; }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
 
-    <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
@@ -47,9 +55,7 @@
   <a href="/login" class="hidden sm:block text-gray-600 font-medium hover:text-blue-600">Log In</a>
 {% endif %}
                     <a href="/cart" class="flex items-center space-x-2 text-gray-600 font-medium hover:text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         <span class="hidden sm:block">Cart</span>
                     </a>
                 </div>
@@ -58,36 +64,25 @@
     </header>
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Search and Filter Controls -->
         <div class="mb-8">
             <div class="flex flex-col sm:flex-row gap-4 max-w-3xl mx-auto">
-                <!-- Search Bar -->
                 <div class="relative flex-grow">
                     <input type="text" id="searchInput" placeholder="Search for products..." class="w-full border border-gray-300 rounded-lg py-3 px-5 text-base sm:text-lg custom-focus shadow-sm">
                     <div class="absolute right-0 top-0 h-full flex items-center pr-4 text-gray-400 pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </div>
                 </div>
-                <!-- Category Filter Dropdown -->
                 <div class="relative">
-                     <select id="categoryFilter" class="w-full sm:w-auto border border-gray-300 rounded-lg py-3 px-4 text-base sm:text-lg custom-focus shadow-sm appearance-none pr-10 cursor-pointer">
-                        <!-- Options will be populated by JavaScript -->
-                    </select>
+                     <select id="categoryFilter" class="w-full sm:w-auto border border-gray-300 rounded-lg py-3 px-4 text-base sm:text-lg custom-focus shadow-sm appearance-none pr-10 cursor-pointer"></select>
                     <div class="absolute right-0 top-0 h-full flex items-center pr-3 text-gray-400 pointer-events-none">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Product Grid -->
         <section>
             <h2 class="text-2xl font-bold text-gray-800 mb-6" id="product-grid-title">All Products</h2>
-            <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-                <!-- Product cards will be dynamically inserted here -->
-            </div>
+            <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6"></div>
              <div id="no-results" class="text-center py-16 text-gray-500 hidden">
                 <h3 class="text-2xl font-semibold">No products found</h3>
                 <p>Try adjusting your search or filter to find what you're looking for.</p>
@@ -95,18 +90,54 @@
         </section>
     </main>
 
+    <button id="ai-button" class="fixed bottom-6 right-6 bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-110 focus:outline-none custom-focus" title="Ask AI Assistant">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v2.268l1.428-1.428a1 1 0 111.414 1.414l-2.122 2.121a1 1 0 01-1.414 0L8.182 6.254a1 1 0 111.414-1.414L11 6.268V4a1 1 0 01-1-1zm-4.707 9.293a1 1 0 011.414 0L8 13.586l1.293-1.293a1 1 0 111.414 1.414l-2.121 2.121a1 1 0 01-1.414 0L5.293 13.707a1 1 0 010-1.414zM2 10a1 1 0 011-1h2.268l-1.428-1.428a1 1 0 111.414-1.414l2.121 2.121a1 1 0 010 1.414L5.254 11.828a1 1 0 11-1.414-1.414L6.268 9H3a1 1 0 01-1-1zm12.707-3.707a1 1 0 010 1.414L13.414 12l1.293 1.293a1 1 0 11-1.414 1.414l-2.121-2.121a1 1 0 010-1.414L13.707 9.172a1 1 0 011.414-1.414L16.268 9H17a1 1 0 110 2h-2.268l1.428 1.428a1 1 0 11-1.414 1.414L12.172 11.293a1 1 0 01-1.414-1.414L11.586 9l-1.293-1.293a1 1 0 111.414-1.414l2.121 2.121a1 1 0 010 1.414L12.707 12.828a1 1 0 11-1.414 1.414l-1.144-1.144a1 1 0 111.414-1.414l.439.439a1 1 0 011.414 0l2.121-2.121a1 1 0 010-1.414l-2.121-2.121a1 1 0 11-1.414 1.414l.439.439a1 1 0 010 1.414l-1.144 1.144a1 1 0 11-1.414-1.414L11 9.414V7a1 1 0 112 0v2.268l1.428-1.428a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+    </button>
+    
+    <div id="ai-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative flex flex-col" style="height: 70vh;">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="flex items-center space-x-3 mb-4 pb-4 border-b">
+                <div class="bg-blue-100 p-2 rounded-full">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v2.268l1.428-1.428a1 1 0 111.414 1.414l-2.122 2.121a1 1 0 01-1.414 0L8.182 6.254a1 1 0 111.414-1.414L11 6.268V4a1 1 0 01-1-1zm-4.707 9.293a1 1 0 011.414 0L8 13.586l1.293-1.293a1 1 0 111.414 1.414l-2.121 2.121a1 1 0 01-1.414 0L5.293 13.707a1 1 0 010-1.414zM2 10a1 1 0 011-1h2.268l-1.428-1.428a1 1 0 111.414-1.414l2.121 2.121a1 1 0 010 1.414L5.254 11.828a1 1 0 11-1.414-1.414L6.268 9H3a1 1 0 01-1-1zm12.707-3.707a1 1 0 010 1.414L13.414 12l1.293 1.293a1 1 0 11-1.414 1.414l-2.121-2.121a1 1 0 010-1.414L13.707 9.172a1 1 0 011.414-1.414L16.268 9H17a1 1 0 110 2h-2.268l1.428 1.428a1 1 0 11-1.414 1.414L12.172 11.293a1 1 0 01-1.414-1.414L11.586 9l-1.293-1.293a1 1 0 111.414-1.414l2.121 2.121a1 1 0 010 1.414L12.707 12.828a1 1 0 11-1.414 1.414l-1.144-1.144a1 1 0 111.414-1.414l.439.439a1 1 0 011.414 0l2.121-2.121a1 1 0 010-1.414l-2.121-2.121a1 1 0 11-1.414 1.414l.439.439a1 1 0 010 1.414l-1.144 1.144a1 1 0 11-1.414-1.414L11 9.414V7a1 1 0 112 0v2.268l1.428-1.428a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">AI Assistant</h3>
+            </div>
+            <div id="ai-chat-window" class="flex-grow bg-gray-50 p-4 rounded-lg overflow-y-auto flex flex-col space-y-2">
+                <div class="ai-message chat-bubble">
+                    <p>Hi there! How can I help you find the perfect product today?</p>
+                </div>
+            </div>
+            <div class="mt-4 relative">
+                <input type="text" id="ai-input" placeholder="Type your message..." class="w-full border border-gray-300 rounded-lg py-2 pl-4 pr-12 custom-focus">
+                <button id="ai-send-btn" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white rounded-md p-1.5 hover:bg-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
-let productsFromDB = [];
+        let productsFromDB = [];
 
-async function loadProducts() {
-    const res = await fetch("/getproducts");
-    productsFromDB = await res.json();
-    populateCategories();
-    applyFiltersAndSearch();
-    console.log(productsFromDB);
-}
+        async function loadProducts() {
+            try {
+                const res = await fetch("/getproducts");
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                productsFromDB = await res.json();
+                populateCategories();
+                applyFiltersAndSearch();
+            } catch (error) {
+                console.error("Could not load products:", error);
+                const productGrid = document.getElementById('product-grid');
+                productGrid.innerHTML = `<div class="col-span-full text-center py-16 text-red-600"><h3 class="text-2xl font-semibold">Failed to load products</h3><p>Please try refreshing the page.</p></div>`;
+            }
+        }
 
-window.onload = loadProducts;
+        window.onload = loadProducts;
 
         const productGrid = document.getElementById('product-grid');
         const searchInput = document.getElementById('searchInput');
@@ -114,114 +145,124 @@ window.onload = loadProducts;
         const noResults = document.getElementById('no-results');
         const gridTitle = document.getElementById('product-grid-title');
         
-        const inrFormatter = new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            minimumFractionDigits: 0,
-        });
+        const inrFormatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 });
         
-        // --- POPULATE CATEGORY FILTER ---
         function populateCategories() {
             const categories = ['All Categories', ...new Set(productsFromDB.map(p => p.category))];
             categoryFilter.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
         }
 
-        // --- DISPLAY PRODUCTS ---
-function displayProducts(products) {
-    productGrid.innerHTML = '';
+        function displayProducts(products) {
+            productGrid.innerHTML = '';
+            const hasProducts = products.length > 0;
+            noResults.classList.toggle('hidden', hasProducts);
+            productGrid.classList.toggle('hidden', !hasProducts);
+            products.forEach(product => {
+                const link = document.createElement("a");
+                link.href = `/product/${product.product_id}`;
+                link.className = "block";
+                link.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden product-card">
+                        <div class="relative">
+                            <img src="/static/${product.product_id}.jpg" alt="${product.name}" class="w-full h-40 object-cover" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200/EBF4FF/76A9FA?text=${encodeURIComponent(product.name)}';">
+                        </div>
+                        <div class="p-4">
+                            <p class="text-xs text-gray-500">${product.category}</p>
+                            <h3 class="text-sm font-medium text-gray-800 truncate" title="${product.name}">${product.name}</h3>
+                            <p class="text-lg font-bold text-gray-900 mt-1">${inrFormatter.format(product.price)}</p>
+                        </div>
+                    </div>`;
+                productGrid.appendChild(link);
+            });
+        }
 
-    const hasProducts = products.length > 0;
-    noResults.classList.toggle('hidden', hasProducts);
-    productGrid.classList.toggle('hidden', !hasProducts);
-
-    products.forEach(product => {
-        const bgColor = stringToColor(product.name);
-        const textColor = 'FFFFFF';
-        const placeholderText = product.name.split(' ').map(w => w[0]).join('');
-
-        // Create link wrapper
-        const link = document.createElement("a");
-        link.href = `/product/${product.product_id}`;
-        link.className = "block";
-
-        // Card div
-        link.innerHTML = `
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden product-card">
-                <div class="relative">
-                    <img src="/static/${product.product_id}.jpg" 
-     alt="${product.name}" class="w-full h-40 object-cover">
-
-                </div>
-                <div class="p-4">
-                    <p class="text-xs text-gray-500">${product.category}</p>
-                    <h3 class="text-sm font-medium text-gray-800 truncate" title="${product.name}">${product.name}</h3>
-                    <p class="text-lg font-bold text-gray-900 mt-1">${inrFormatter.format(product.price)}</p>
-                </div>
-            </div>
-        `;
-
-        productGrid.appendChild(link);
-    });
-}
-
-        // --- APPLY FILTERS AND SEARCH ---
         function applyFiltersAndSearch() {
             const searchTerm = searchInput.value.toLowerCase();
             const selectedCategory = categoryFilter.value;
-
             let filteredProducts = productsFromDB;
-
-            // 1. Filter by category
-            if (selectedCategory !== 'All Categories') {
+            if (selectedCategory && selectedCategory !== 'All Categories') {
                 filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
             }
-
-            // 2. Filter by search term
             if (searchTerm) {
-                filteredProducts = filteredProducts.filter(product =>
-                    product.name.toLowerCase().includes(searchTerm)
-                );
+                filteredProducts = filteredProducts.filter(product => product.name.toLowerCase().includes(searchTerm));
             }
-            
             updateGridTitle(searchTerm, selectedCategory);
             displayProducts(filteredProducts);
         }
 
-        // --- UPDATE GRID TITLE ---
         function updateGridTitle(searchTerm, category) {
-            if (searchTerm && category !== 'All Categories') {
+            if (searchTerm && category && category !== 'All Categories') {
                 gridTitle.textContent = `Results for "${searchTerm}" in ${category}`;
             } else if (searchTerm) {
                 gridTitle.textContent = `Results for "${searchTerm}"`;
-            } else if (category !== 'All Categories') {
+            } else if (category && category !== 'All Categories') {
                 gridTitle.textContent = `Showing all ${category}`;
             } else {
                 gridTitle.textContent = 'All Products';
             }
         }
-        
-        function stringToColor(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            let color = '#';
-            for (let i = 0; i < 3; i++) {
-                let value = (hash >> (i * 8)) & 0xFF;
-                color += ('00' + value.toString(16)).substr(-2);
-            }
-            return color.substring(1);
-        }
 
-        // --- INITIALIZE ---
         searchInput.addEventListener('keyup', applyFiltersAndSearch);
         categoryFilter.addEventListener('change', applyFiltersAndSearch);
 
-        // Initial setup on page load
-        populateCategories();
-        applyFiltersAndSearch();
+        const aiButton = document.getElementById('ai-button');
+        const aiModal = document.getElementById('ai-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
 
+        function openModal() { aiModal.classList.remove('hidden'); }
+        function closeModal() { aiModal.classList.add('hidden'); }
+
+        aiButton.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        aiModal.addEventListener('click', (event) => { if (event.target === aiModal) closeModal(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !aiModal.classList.contains('hidden')) closeModal(); });
+
+        const aiSendBtn = document.getElementById('ai-send-btn');
+        const aiInput = document.getElementById('ai-input');
+        const chatWindow = document.getElementById('ai-chat-window');
+
+        async function handleSendMessage() {
+            const userPrompt = aiInput.value.trim();
+            if (!userPrompt) return;
+            appendMessage(userPrompt, 'user');
+            aiInput.value = '';
+            const thinkingBubble = appendMessage('...', 'ai');
+            try {
+                const response = await fetch('/ask_ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: userPrompt })
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                
+                // MODIFIED LINE: This now handles bolding
+                const formattedResponse = (data.reply || data.message || "No response").replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                thinkingBubble.innerHTML = `<p>${formattedResponse}</p>`;
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                thinkingBubble.innerHTML = `<p>Sorry, I'm having trouble connecting. Please try again later.</p>`;
+            }
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+        
+        function appendMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-bubble', sender === 'user' ? 'user-message' : 'ai-message');
+            messageDiv.innerHTML = `<p>${text}</p>`;
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            return messageDiv;
+        }
+
+        aiSendBtn.addEventListener('click', handleSendMessage);
+        aiInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                handleSendMessage();
+            }
+        });
     </script>
 </body>
 </html>
-
