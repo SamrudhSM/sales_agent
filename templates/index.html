@@ -1,9 +1,235 @@
-<body>
-  {% if name %}
-    <h1>Welcome, {{ name }}!</h1>
-    <a href="/logout"><button>Log Out</button></a>
-  {% else %}
-    <h1>Welcome guest user</h1>
-    <a href="/login"><button>Log In / Sign Up</button></a>
-  {% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopSage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .product-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        /* Custom focus styles for better accessibility */
+        .custom-focus:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+            --tw-ring-color: rgb(59 130 246 / 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="#" class="text-3xl font-extrabold text-gray-900">
+                    Market<span class="text-blue-600">place</span>
+                </a>
+                <div class="flex items-center space-x-6">
+                    <a href="#" class="hidden sm:block text-gray-600 font-medium hover:text-blue-600">Log In</a>
+                    <a href="#" class="flex items-center space-x-2 text-gray-600 font-medium hover:text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="hidden sm:block">Cart</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Search and Filter Controls -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row gap-4 max-w-3xl mx-auto">
+                <!-- Search Bar -->
+                <div class="relative flex-grow">
+                    <input type="text" id="searchInput" placeholder="Search for products..." class="w-full border border-gray-300 rounded-lg py-3 px-5 text-base sm:text-lg custom-focus shadow-sm">
+                    <div class="absolute right-0 top-0 h-full flex items-center pr-4 text-gray-400 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <!-- Category Filter Dropdown -->
+                <div class="relative">
+                     <select id="categoryFilter" class="w-full sm:w-auto border border-gray-300 rounded-lg py-3 px-4 text-base sm:text-lg custom-focus shadow-sm appearance-none pr-10 cursor-pointer">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                    <div class="absolute right-0 top-0 h-full flex items-center pr-3 text-gray-400 pointer-events-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6" id="product-grid-title">All Products</h2>
+            <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                <!-- Product cards will be dynamically inserted here -->
+            </div>
+             <div id="no-results" class="text-center py-16 text-gray-500 hidden">
+                <h3 class="text-2xl font-semibold">No products found</h3>
+                <p>Try adjusting your search or filter to find what you're looking for.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const productsFromDB = [
+            {"id":1, "name":"Apple iPad Air", "category":"Electronics", "description":"Tablet for work and study", "price":49717},
+            {"id":2, "name":"Puma Hoodie", "category":"Fashion", "description":"Casual cotton hoodie", "price":6267},
+            {"id":3, "name":"Adidas Sports T-Shirt", "category":"Fashion", "description":"Breathable workout t-shirt", "price":3319},
+            {"id":4, "name":"Nike Sports Shorts", "category":"Fashion", "description":"Comfortable gym shorts", "price":3735},
+            {"id":5, "name":"Zara Leather Jacket", "category":"Fashion", "description":"Stylish leather jacket", "price":10707},
+            {"id":6, "name":"H&M Summer Dress", "category":"Fashion", "description":"Floral summer dress", "price":4939},
+            {"id":7, "name":"Fila Disruptor", "category":"Shoes", "description":"Chunky sneakers trend", "price":7055},
+            {"id":8, "name":"Reebok Classic Leather", "category":"Shoes", "description":"Casual everyday sneakers", "price":7470},
+            {"id":9, "name":"Sony Alpha 7C", "category":"Electronics", "description":"Full-frame mirrorless camera", "price":149399},
+            {"id":10, "name":"Nikon Z30", "category":"Electronics", "description":"Compact mirrorless camera", "price":58926},
+            {"id":11, "name":"Canon EOS R10", "category":"Electronics", "description":"Mirrorless camera for beginners", "price":81257},
+            {"id":12, "name":"Fitbit Charge 6", "category":"Electronics", "description":"Fitness tracking smartwatch", "price":13276},
+            {"id":13, "name":"Apple Watch Series 9", "category":"Electronics", "description":"Smartwatch for fitness and notifications", "price":33117},
+            {"id":14, "name":"Uniqlo T-Shirt", "category":"Fashion", "description":"Basic crew neck t-shirt", "price":1652},
+            {"id":15, "name":"H&M Hoodie", "category":"Fashion", "description":"Comfortable cotton hoodie", "price":4149},
+            {"id":16, "name":"Levi's 501 Jeans", "category":"Fashion", "description":"Classic straight-fit jeans", "price":8134},
+            {"id":17, "name":"Zara Denim Jeans", "category":"Fashion", "description":"Slim-fit denim jeans", "price":5802},
+            {"id":18, "name":"Zara Summer Shirt", "category":"Fashion", "description":"Light cotton shirt for summer", "price":4142},
+            {"id":19, "name":"Puma RS-X", "category":"Shoes", "description":"Trendy sneakers for casual wear", "price":9130},
+            {"id":20, "name":"Nike Revolution 6", "category":"Shoes", "description":"Everyday comfortable running shoes", "price":5395},
+            {"id":21, "name":"Adidas Ultraboost", "category":"Shoes", "description":"High-performance running shoes", "price":14940},
+            {"id":22, "name":"Bose QuietComfort 45", "category":"Electronics", "description":"Premium noise-cancelling headphones", "price":27307},
+            {"id":23, "name":"Sony WH-1000XM5", "category":"Electronics", "description":"Noise-cancelling headphones", "price":33199},
+            {"id":24, "name":"HP Spectre x360", "category":"Electronics", "description":"Convertible laptop for designers", "price":103749},
+            {"id":25, "name":"Dell XPS 13", "category":"Electronics", "description":"Compact laptop for work and study", "price":82999},
+            {"id":26, "name":"Samsung Galaxy S23", "category":"Electronics", "description":"Latest Samsung smartphone", "price":66399},
+            {"id":27, "name":"Zara Floral Maxi", "category":"Fashion", "description":"Floral black maxi dress", "price":7462},
+            {"id":28, "name":"Zara Black Dress", "category":"Fashion", "description":"Elegant black dress for evening parties", "price":6632},
+            {"id":29, "name":"Apple iPhone 15", "category":"Electronics", "description":"Latest iPhone with A17 chip", "price":66317},
+            {"id":30, "name":"MacBook Air M2", "category":"Electronics", "description":"Laptop for designers and students", "price":99517},
+            {"id":31, "name":"Puma Velocity", "category":"Shoes", "description":"High-performance sneakers", "price":10790},
+            {"id":32, "name":"Adidas RunFalcon", "category":"Shoes", "description":"Comfortable daily running shoes", "price":4980},
+            {"id":33, "name":"Nike Air Zoom", "category":"Shoes", "description":"Lightweight running shoes", "price":9960}
+        ];
+
+        const productGrid = document.getElementById('product-grid');
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const noResults = document.getElementById('no-results');
+        const gridTitle = document.getElementById('product-grid-title');
+        
+        const inrFormatter = new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0,
+        });
+        
+        // --- POPULATE CATEGORY FILTER ---
+        function populateCategories() {
+            const categories = ['All Categories', ...new Set(productsFromDB.map(p => p.category))];
+            categoryFilter.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        // --- DISPLAY PRODUCTS ---
+        function displayProducts(products) {
+            productGrid.innerHTML = '';
+            
+            const hasProducts = products.length > 0;
+            noResults.classList.toggle('hidden', hasProducts);
+            productGrid.classList.toggle('hidden', !hasProducts);
+
+            products.forEach(product => {
+                const bgColor = stringToColor(product.name);
+                const textColor = 'FFFFFF';
+                const placeholderText = product.name.split(' ').map(w => w[0]).join('');
+
+                const productCard = `
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden product-card">
+                        <div class="relative">
+                            <img src="https://placehold.co/300x300/${bgColor}/${textColor}?text=${placeholderText}&font=inter" alt="${product.name}" class="w-full h-40 object-cover">
+                        </div>
+                        <div class="p-4">
+                            <p class="text-xs text-gray-500">${product.category}</p>
+                            <h3 class="text-sm font-medium text-gray-800 truncate" title="${product.name}">${product.name}</h3>
+                            <p class="text-lg font-bold text-gray-900 mt-1">${inrFormatter.format(product.price)}</p>
+                        </div>
+                    </div>
+                `;
+                productGrid.innerHTML += productCard;
+            });
+        }
+
+        // --- APPLY FILTERS AND SEARCH ---
+        function applyFiltersAndSearch() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+
+            let filteredProducts = productsFromDB;
+
+            // 1. Filter by category
+            if (selectedCategory !== 'All Categories') {
+                filteredProducts = filteredProducts.filter(product => product.category === selectedCategory);
+            }
+
+            // 2. Filter by search term
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(product =>
+                    product.name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            updateGridTitle(searchTerm, selectedCategory);
+            displayProducts(filteredProducts);
+        }
+
+        // --- UPDATE GRID TITLE ---
+        function updateGridTitle(searchTerm, category) {
+            if (searchTerm && category !== 'All Categories') {
+                gridTitle.textContent = `Results for "${searchTerm}" in ${category}`;
+            } else if (searchTerm) {
+                gridTitle.textContent = `Results for "${searchTerm}"`;
+            } else if (category !== 'All Categories') {
+                gridTitle.textContent = `Showing all ${category}`;
+            } else {
+                gridTitle.textContent = 'All Products';
+            }
+        }
+        
+        function stringToColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            let color = '#';
+            for (let i = 0; i < 3; i++) {
+                let value = (hash >> (i * 8)) & 0xFF;
+                color += ('00' + value.toString(16)).substr(-2);
+            }
+            return color.substring(1);
+        }
+
+        // --- INITIALIZE ---
+        searchInput.addEventListener('keyup', applyFiltersAndSearch);
+        categoryFilter.addEventListener('change', applyFiltersAndSearch);
+
+        // Initial setup on page load
+        populateCategories();
+        applyFiltersAndSearch();
+
+    </script>
 </body>
+</html>
+
