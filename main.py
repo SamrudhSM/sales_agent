@@ -77,8 +77,7 @@ def product_page(product_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Fetch product info from DB (assuming you have a products table)
-    cursor.execute("SELECT product_id, name, description, price FROM products WHERE product_id = ?", (product_id,))
+    cursor.execute("SELECT product_id, name, description, price, category FROM products WHERE product_id = ?", (product_id,))
     product = cursor.fetchone()
     conn.close()
 
@@ -87,7 +86,8 @@ def product_page(product_id):
             "id": product[0],
             "name": product[1],
             "description": product[2],
-            "price": product[3]
+            "price": product[3],
+            "category": product[4]
         }
     else:
         product_data = None  # If product not found
