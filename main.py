@@ -122,6 +122,45 @@ def cart():
     return render_template("cart.html", name=session.get("customer_name"), cart_items=cart_items)
 
 
+@app.route("/add_to_cart/<int:product_id>", methods=["POST"])
+def add_to_cart(product_id):
+    if "customer_id" not in session:
+        return redirect(url_for("login"))
+
+    customer_id = session["customer_id"]
+
+    conn = get_db_connection()
+    try:
+        # Check if the item is already in the cart
+        cart_item = conn.execute(
+            "SELECT quantity FROM cart WHERE customer_id = ? AND product_id = ?",
+            (customer_id, product_id)
+        ).fetchone()
+
+        if cart_item:
+            # If item exists, update the quantity
+            new_quantity = cart_item["quantity"] + 1
+            conn.execute(
+                "UPDATE cart SET quantity = ? WHERE customer_id = ? AND product_id = ?",
+                (new_quantity, customer_id, product_id)
+            )
+        else:
+            # If item is new, add it to the cart
+            conn.execute(
+                "INSERT INTO cart (customer_id, product_id, quantity) VALUES (?, ?, 1)",
+                (customer_id, product_id)
+            )
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(f"Database error: {e}")
+        return "Failed to add item to cart.", 500
+    finally:
+        conn.close()
+
+    return redirect(url_for("cart"))
+
+
 def get_products():
     conn = sqlite3.connect("data.db")
     conn.row_factory = sqlite3.Row
@@ -135,5 +174,28 @@ def get_products():
 def getproducts():
     return jsonify(get_products())
 
+
+@app.route("/checkout", methods=["POST"])
+def checkout():
+    if "customer_id" not in session:
+        return redirect(url_for("login"))
+
+    customer_id = session["customer_id"]
+
+    conn = get_db_connection()
+    try:
+        conn.execute("DELETE FROM cart WHERE customer_id = ?", (customer_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(f"Database error during checkout: {e}")
+    finally:
+        conn.close()
+
+    return redirect(url_for("home"))
+
+ 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
