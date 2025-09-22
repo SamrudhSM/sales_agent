@@ -186,11 +186,28 @@ def checkout():
 
     conn = get_db_connection()
     try:
+        # Fetch items in cart
+        cart_items = conn.execute(
+            "SELECT product_id, quantity FROM cart WHERE customer_id = ?",
+            (customer_id,)
+        ).fetchall()
+
+        # Insert them into purchases
+        for item in cart_items:
+            conn.execute(
+                "INSERT INTO purchases (customer_id, product_id, quantity) VALUES (?, ?, ?)",
+                (customer_id, item["product_id"], item["quantity"])
+            )
+
+        # Clear cart for this customer
         conn.execute("DELETE FROM cart WHERE customer_id = ?", (customer_id,))
+
         conn.commit()
+
     except sqlite3.Error as e:
         conn.rollback()
         print(f"Database error during checkout: {e}")
+        return "Checkout failed.", 500
     finally:
         conn.close()
 
