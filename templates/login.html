@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .auth-box {
+      background: #111;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+      width: 100%;
+      max-width: 420px;
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: #fff;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      background: #000;
+      border: 1px solid #555;
+      border-radius: 8px;
+      color: #fff;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #fff;
+      border: none;
+      color: #000;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #ccc;
+    }
+    .switch {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .switch a {
+      color: #fff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .error {
+      color: #ff5e5e;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .form-section {
+      display: none;
+    }
+    .form-section.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-box">
+    <h2 id="form-title">Login</h2>
+    <div id="error" class="error"></div>
+    <form id="auth-form">
+      
+      <!-- Login Fields -->
+      <div id="login-fields" class="form-section active">
+        <input type="email" id="login-email" name="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" name="login-password" placeholder="Password" required>
+      </div>
+      
+      <!-- Signup Fields -->
+      <div id="signup-fields" class="form-section">
+        <input type="text" id="name" name="name" placeholder="Full Name">
+        <input type="email" id="email" name="email" placeholder="Email">
+        <input type="password" id="password" name="password" placeholder="Password">
+        <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm Password">
+      </div>
+      
+      <button type="submit" id="submit-btn">Log In</button>
+    </form>
+    <div class="switch" id="switch-text">
+      Don't have an account? <a onclick="toggleMode()">Sign up</a>
+    </div>
+  </div>
+
+<script>
+let isLogin = true;
+
+function toggleMode() {
+  isLogin = !isLogin;
+
+  // Update UI text
+  document.getElementById('form-title').textContent = isLogin ? 'Login' : 'Sign Up';
+  document.getElementById('submit-btn').textContent = isLogin ? 'Log In' : 'Sign Up';
+
+  // Toggle form sections
+  const loginFields = document.getElementById('login-fields');
+  const signupFields = document.getElementById('signup-fields');
+  
+  if (isLogin) {
+    loginFields.classList.add('active');
+    signupFields.classList.remove('active');
+    // Remove required attribute from signup fields
+    signupFields.querySelectorAll('input').forEach(input => {
+      input.removeAttribute('required');
+    });
+    // Add required attribute to login fields
+    loginFields.querySelectorAll('input').forEach(input => {
+      input.setAttribute('required', 'required');
+    });
+  } else {
+    loginFields.classList.remove('active');
+    signupFields.classList.add('active');
+    // Remove required attribute from login fields
+    loginFields.querySelectorAll('input').forEach(input => {
+      input.removeAttribute('required');
+    });
+    // Add required attribute to signup fields
+    signupFields.querySelectorAll('input').forEach(input => {
+      input.setAttribute('required', 'required');
+    });
+  }
+
+  // Update toggle link
+  document.getElementById('switch-text').innerHTML = isLogin
+    ? `Don't have an account? <a onclick="toggleMode()">Sign up</a>`
+    : `Already have an account? <a onclick="toggleMode()">Log in</a>`;
+
+  // Clear any error messages
+  document.getElementById("error").textContent = "";
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const errorDiv = document.getElementById("error");
+  errorDiv.textContent = "";
+
+  if (isLogin) {
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value.trim();
+
+    if (!email || !password) {
+      errorDiv.textContent = "Please fill in all required fields.";
+      return;
+    }
+
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+      console.log("Login response:", data);
+
+      if (res.ok) {
+        window.location.href = '/';
+      } else {
+        errorDiv.textContent = data.error || 'Login failed.';
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      errorDiv.textContent = "An error occurred. Please try again.";
+    }
+
+  } else {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const confirmPassword = document.getElementById("confirm-password").value.trim();
+
+    if (!name || !email || !password || !confirmPassword) {
+      errorDiv.textContent = "Please fill in all fields.";
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      errorDiv.textContent = "Passwords do not match.";
+      return;
+    }
+
+    try {
+      const res = await fetch('/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+
+      const data = await res.json();
+      console.log("Signup response:", data);
+
+      if (res.ok) {
+        window.location.href = '/';
+      } else {
+        errorDiv.textContent = data.error || 'Signup failed.';
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      errorDiv.textContent = "An error occurred. Please try again.";
+    }
+  }
+}
+
+document.getElementById("auth-form").addEventListener("submit", handleAuth);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+<body>
+  {% if name %}
+    <h1>Welcome, {{ name }}!</h1>
+    <a href="/logout"><button>Log Out</button></a>
+  {% else %}
+    <h1>Welcome guest user</h1>
+    <a href="/login"><button>Log In / Sign Up</button></a>
+  {% endif %}
+</body>
