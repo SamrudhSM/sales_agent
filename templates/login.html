@@ -175,7 +175,7 @@ async function handleAuth(e) {
       console.log("Login response:", data);
 
       if (res.ok) {
-        window.location.href = '/';
+        window.location.href = '/home';
       } else {
         errorDiv.textContent = data.error || 'Login failed.';
       }
@@ -211,7 +211,7 @@ async function handleAuth(e) {
       console.log("Signup response:", data);
 
       if (res.ok) {
-        window.location.href = '/';
+        window.location.href = '/home';
       } else {
         errorDiv.textContent = data.error || 'Signup failed.';
       }

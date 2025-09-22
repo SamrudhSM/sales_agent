@@ -13,8 +13,15 @@ def get_db_connection():
 
 @app.route("/")
 def index():
+    return redirect(url_for("login"))
+
+@app.route("/home")
+def home():
+    if "customer_id" not in session:
+        return redirect(url_for("login"))  # protect route
     name = session.get("customer_name")
     return render_template("index.html", name=name)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -35,9 +42,10 @@ def login():
     if user:
         session["customer_id"] = user["customer_id"]
         session["customer_name"] = user["name"]
-        return jsonify({"message": "Login successful"}), 200
+        return jsonify({"message": "Login successful", "redirect": "/home"}), 200
     else:
         return jsonify({"error": "Invalid email or password"}), 401
+
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -62,7 +70,7 @@ def signup():
         # Auto-login
         session["customer_id"] = user["customer_id"]
         session["customer_name"] = user["name"]
-        return jsonify({"message": "Signup successful"}), 201
+        return jsonify({"message": "Signup successful", "redirect": "/home"}), 201
 
     except sqlite3.IntegrityError:
         return jsonify({"error": "Email already exists"}), 409
@@ -70,7 +78,7 @@ def signup():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("index"))
+    return redirect(url_for("login"))
 
 @app.route("/product/<int:product_id>")
 def product_page(product_id):
@@ -93,6 +101,25 @@ def product_page(product_id):
         product_data = None  # If product not found
     
     return render_template("product.html", product=product_data)
+
+@app.route("/cart")
+def cart():
+    if "customer_id" not in session:
+        return redirect(url_for("login"))
+
+    customer_id = session["customer_id"]
+
+    conn = get_db_connection()
+    cart_items = conn.execute("""
+        SELECT c.cart_id, c.quantity, c.added_at,
+               p.product_id, p.name, p.price, p.category
+        FROM cart c
+        JOIN products p ON c.product_id = p.product_id
+        WHERE c.customer_id = ?
+    """, (customer_id,)).fetchall()
+    conn.close()
+
+    return render_template("cart.html", name=session.get("customer_name"), cart_items=cart_items)
 
 
 def get_products():
